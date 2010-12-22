@@ -7,31 +7,31 @@ BEGIN {
 }
 
 eval { destructuring_bind };
-ok( ! $@, "Silent" );
+ok( ! $@, "Bare call is a no-op" );
 
 eval { destructuring_bind 27 };
-ok( ! $@, "Silent with scalar input" );
+ok( ! $@, "Bare call with scalar is a no-op" );
 
 eval { destructuring_bind (27) x 100 };
-ok( ! $@, "Silent with lots of scalar input" );
+ok( ! $@, "Bare call with *lots* of scalars is a no-op" );
 
 eval { destructuring_bind [ ] };
-ok( ! $@, "Silent with empty arrayref input" );
+ok( ! $@, "Bare call with empty arrayref is a no-op" );
 
 eval { destructuring_bind [ 27 ] };
-ok( ! $@, "Silent with arrayref input" );
+ok( ! $@, "Bare call with arrayref is a no-op" );
 
 eval { destructuring_bind [ (27) x 100 ] };
-ok( ! $@, "Silent with large arrayref input" );
+ok( ! $@, "Bare call with large arrayref is a no-op" );
 
 eval { destructuring_bind { } };
-ok( ! $@, "Silent with empty hashref input" );
+ok( ! $@, "Bare call with empty hashref is a no-op" );
 
 eval { destructuring_bind { a => 1 } };
-ok( ! $@, "Silent with small hashref input" );
+ok( ! $@, "Bare call with small hashref is a no-op" );
 
 eval { destructuring_bind { (27, 'foo') x 100 } };
-ok( ! $@, "Silent with large hashref input" );
+ok( ! $@, "Bare call with large hashref is a no-op" );
 
 eval { destructuring_bind bless {},'foo' };
-ok( ! $@, "Silent with blessed empty object" );
+ok( ! $@, "Bare call with blessed hash is a no-op" );
