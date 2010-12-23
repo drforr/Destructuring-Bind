@@ -22,75 +22,61 @@ Emulates what we can of Lisp's (destructuring-bind) in Perl.
 
     use Destructuring::Bind qw( destructuring_bind );
 
-    $bind_me = [ { text => q{Hello world} }, "Stuff" ];
-    ( $text, $description ) =
-      destructuring_bind $bind_me;
+    sub print_name {
+      my ( $self, { given => $given, family => $family } ) =
+        destructuring_bind @_;
+      say "$given $family";
+    }
+    $obj->print_name( { given => "Jane", family => "Doe" } );
     
 
 =head1 EXPORT
 
 =head2 destructuring_bind
 
-The core and only notable "function" exported by this module. It performs the
-rough equivalent of the (destructuring-bind) macro on a Perl data structure.
+This is more of a syntax extension than a function. On its RHS it accepts an arbitrarily complex data structure, and on the LHS it accepts a list of Perl variables, in arbitrarily nested anonymous data structures.
 
-In general it can be thought of as the list assignment operator on steroids.
+That's a really vague and generic description, so let's work with a concrete example. Suppose you're dealing with an employee record that looks like this:
 
-For example, a common way to "unpack" function arguments looks like this:
+  $employee = {
+    name => {
+      given => 'Jane',
+      family => 'Doe'
+    },
+    salary => 75_000
+  };
 
-  sub print_name {
-    my ( $self, $name ) = @_;
-    print $name->{given} . ' ' . $name->{surname};
+A simple method to print an employee's salary could look like this:
+
+  sub print_salary {
+    my ( $self, $emp ) = @_;
+    say "$emp->{name}{given} $emp->{name}{family}: $emp->{salary}";
   }
-  $self->print_name({ given => 'Jane', surname => 'Doe' }); # "Jane Doe"
 
-Destructuring-bind allows you to look deeper into the argument list. For
-instance, you're really only interested in the surname and given name in that
-particular method, so destructuring-bind lets you write this:
+Or you could extract the name and salary, then print it:
 
-  sub print_name {
-    my ( $self, { given => $given, surname => $surname } ) =
-      destructuring_bind @_;
-    print $given . ' ' . $surname;
+  sub print_salary {
+    my ( $self, $emp ) = @_;
+    my ( $given, $family, $salary ) = (
+      $emp->{name}{given},
+      $emp->{name}{family},
+      $emp->{salary}
+    );
+    say "$given $family: $salary";
   }
-  $self->print_name({ given => 'Jane', surname => 'Doe' }); # "Jane Doe"
 
-To this end, the module accepts everything that can normally be found on the
-LHS of a list assignment, and lots of things that normally wouldn't be allowed.
+But that's pretty inelegant. Hash slices are one solution, but wouldn't it be nice if you could do something like:
 
-=head2 Bindings
+  sub print_salary {
+    my ( $self,
+         { name =>
+           { given => $given,
+             family => $family },
+           salary => $salary } ) = destructuring_bind @_;
+    say "$given $family: $salary";
+  }
 
-Straightforward list assignment still works:
-
-  ( $foo, $bar, $baz ) = destructuring_bind 1, 2, 3; # $foo = 1, etc.
-
-Adding undef's skips unwanted entries:
-
-  ( $foo, undef, $baz ) = destructuring_bind 1, 2, 3; # $baz = 3
-
-Assignment to a list is still unchanged:
-
-  @foo = destructuring_bind 1, 2, 3; # @foo = ( 1, 2, 3 )
-
-And lists still swallow the rest of the input:
-
-  ( @foo, $bar ) = destructuring_bind 1, 2; # @foo = ( 1, 2 ); $bar = undef
-
-But you can assign to list elements:
-
-  ( $foo[0], $bar ) = destructuring_bind 1, 2; # @foo = ( 1 ); $bar = 2
-
-And list slices:
-
-  ( @foo[0,1], $bar ) = destructuring_bind 1, 2, 3; # @foo = ( 1, 2 ); $bar = 3
-
-  ( @foo[1..3], $bar ) = destructuring_bind 1..4;
-  # @foo = ( undef, 1, 2, 3 ); $bar = 4
-
-List slices can run to the end of the list:
-
-  ( @foo[2..-1], $bar ) = destructuring_bind 1, 2, 3;
-  # @foo = ( undef, undef, 1, 2, 3 ); $bar = undef
+And just capture all of the variables in one operation? That's what C<destructuring_bind> is meant to be used for.
 
 =cut
 

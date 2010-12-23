@@ -53,7 +53,7 @@ is( $@, "Cannot destructuring_bind to a constant value" );
 }
 # }}}
 
-# {{{ Binding undef to scalar binds
+# {{{ Binding undef to scalar
 {
   my $scalar = destructuring_bind undef;
   ok( ! $scalar, "Binding undef in scalar context" );
@@ -77,7 +77,7 @@ is( $@, "Cannot destructuring_bind to a constant value" );
 }
 # }}}
 
-# {{{ Binding false values to scalar binds
+# {{{ Binding false values to scalar
 {
   my $scalar = destructuring_bind 0;
   is( $scalar, 0, "Binding 0 in scalar context" );
@@ -167,7 +167,7 @@ is( $@, "Cannot destructuring_bind to a constant value" );
 }
 # }}}
 
-# {{{ Binding true values to scalar binds
+# {{{ Binding true values to scalar
 {
   my $scalar = destructuring_bind 27;
   is( $scalar, 27, "Binding 27 in scalar context" );
@@ -213,7 +213,7 @@ is( $@, "Cannot destructuring_bind to a constant value" );
 }
 # }}}
 
-# {{{ Binding references to scalar binds
+# {{{ Binding references to scalar
 {
   my $scalar = destructuring_bind [ ];
   is_deeply( $scalar, [ ], "Binding [ ] in scalar context" );
@@ -259,7 +259,7 @@ is( $@, "Cannot destructuring_bind to a constant value" );
 }
 # }}}
 
-# {{{ Binding non-empty references to scalar binds
+# {{{ Binding non-empty references to scalar
 {
   my $scalar = destructuring_bind [ 27 ];
   is_deeply( $scalar, [ 27 ], "Binding [ 27 ] in scalar context" );
@@ -317,180 +317,160 @@ is( $@, "Cannot destructuring_bind to a constant value" );
 }
 # }}}
 
-=pod
+# {{{ Binding N values to one scalar maps only the first
+{
+  my $scalar = destructuring_bind 27, 42;
+  is( $scalar, 27, "Binding two values in scalar context gets the first only" );
+}
 
-# {{{ Binding more than one list element to a scalar only gets the *first*.
-$scalar = destructuring_bind( 'foo', 27 );
-is(
-  $scalar, 'foo',
-  "Binding more than one list element to a scalar gets just the first"
-);
+{
+  my ( $scalar ) = destructuring_bind 27, 42;
+  is( $scalar, 27, "Binding two values in list context gets the first only" );
+}
 
-$scalar = destructuring_bind( undef, 27 );
-ok(
-  ! $scalar, 
-  "Binding more than one list element to a scalar gets the first even if undef"
-);
+{
+  my $scalar;
+  $scalar = destructuring_bind 27, 42;
+  is(
+    $scalar, 27,
+    "Binding two values in scalar context without 'my' gets the first only"
+  );
+}
+
+{
+  my $scalar;
+  ( $scalar ) = destructuring_bind 27;
+  is(
+    $scalar, 27,
+    "Binding two values in list context without 'my' gets the first only"
+  );
+}
 # }}}
 
-# {{{ Array element tests
-#
-my @array;
+# {{{ Binding true value to array slice
+{
+  my $array[0] = destructuring_bind 27;
+  is( $array[0], 27, "Binding 27 in scalar context" );
+}
 
-$array[0] = destructuring_bind;
-is_deeply(
-  [ @array ],
-  [ ],
-  "Binding nothing to an undef array element alters nothing"
-);
+{
+  my ( $array[0] ) = destructuring_bind 27;
+  is( $array[0], 27, "Binding 27 in list context" );
+}
 
-$array[0] = destructuring_bind 0;
-is_deeply(
-  [ @array ],
-  [ 0 ],
-  "Binding 0 to an array element"
-);
+{
+  my @array = ( 1, 2 );
+  $array[0] = destructuring_bind 27;
+  is_deeply(
+    \@array,
+    [ 27, 2 ],
+    "Binding 27 to array slice in scalar context without 'my'"
+  );
+}
 
-$array[0] = destructuring_bind '';
-is_deeply(
-  [ @array ],
-  [ '' ],
-  "Binding '' to an array element"
-);
-
-$array[0] = destructuring_bind 'foo';
-is_deeply(
-  [ @array ],
-  [ 'foo' ],
-  "Binding 'foo' to an array element"
-);
-
-$array[1] = destructuring_bind 27
-is_deeply(
-  [ @array ],
-  [ 'foo', 27 ],
-  "Binding 27 to the next array element"
-);
+{
+  my @array = ( 1, 2 );
+  ( $array[0] ) = destructuring_bind 27;
+  is_deeply(
+    \@array,
+    [ 27, 2 ],
+    "Binding 27 to array slice in list context without 'my'"
+  );
+}
 # }}}
 
-# {{{ Hash key tests
-#
-my %hash;
+# {{{ Binding true value to hash slice
+{
+  my $hash{foo} = destructuring_bind 27;
+  is( $hash{foo}, 27, "Binding 27 to hash slice in scalar context" );
+}
 
-$hash{foo} = destructuring_bind;
-is_deeply(
-  \%hash,
-  { },
-  "Binding undef doesn't autovivify a hash key"
-);
+{
+  my ( $hash{foo} ) = destructuring_bind 27;
+  is( $hash{foo}, 27, "Binding 27 to hash slice in list context" );
+}
 
-$hash{foo} = destructuring_bind 0;
-is_deeply(
-  \%hash,
-  { foo => 0 },
-  "Binding 0 to a hash key"
-);
+{
+  my %hash = ( foo => 1, bar => 2 );
+  $hash{foo} = destructuring_bind 27;
+  is_deeply(
+    \%hash,
+    { foo => 27, bar => 2 },
+    "Binding 27 to hash slice in scalar context without 'my'"
+  );
+}
 
-$hash{foo} = destructuring_bind '';
-is_deeply(
-  \%hash,
-  { foo => '' },
-  "Binding '' to a hash key"
-);
-
-$hash{foo} = destructuring_bind 'bar';
-is_deeply(
-  \%hash,
-  { foo => 'bar' },
-  "Binding 'bar' to a hash key"
-);
-
-$hash{1} = destructuring_bind 27
-is_deeply(
-  \%hash,
-  { foo => 'bar', 1 => 27 },
-  "Binding 27 to a new hash key"
-);
+{
+  my %hash = ( foo => 1, bar => 2 );
+  ( $hash{foo} ) = destructuring_bind 27;
+  is_deeply(
+    \%hash,
+    { foo => 27, bar => 2 },
+    "Binding 27 to hash slice in list context without 'my'"
+  );
+}
 # }}}
 
-# {{{ Array element tests
-#
-my $arrayref = [];
+# {{{ Binding true value to arrayref slice
+{
+  my $arrayref->[0] = destructuring_bind 27;
+  is( $arrayref->[0], 27, "Binding 27 to arrayref slice in scalar context" );
+}
 
-$arrayref->[0] = destructuring_bind;
-is_deeply(
-  $arrayref,
-  [ ],
-  "Binding nothing to an undef arrayref element alters nothing"
-);
+{
+  my ( $arrayref->[0] ) = destructuring_bind 27;
+  is( $arrayref->[0], 27, "Binding 27 to arrayref slice in list context" );
+}
 
-$arrayref->[0] = destructuring_bind 0;
-is_deeply(
-  $arrayref,
-  [ 0 ],
-  "Binding 0 to an arrayref element"
-);
+{
+  my $arrayref = [ 1, 2 ];
+  $arrayref->[0] = destructuring_bind 27;
+  is_deeply(
+    $arrayref,
+    [ 27, 2 ],
+    "Binding 27 to arrayref slice in scalar context without 'my'"
+  );
+}
 
-$arrayref->[0] = destructuring_bind '';
-is_deeply(
-  $arrayref,
-  [ '' ],
-  "Binding '' to an arrayref element"
-);
-
-$arrayref->[0] = destructuring_bind 'foo';
-is_deeply(
-  $arrayref,
-  [ 'foo' ],
-  "Binding 'foo' to an arrayref element"
-);
-
-$arrayref->[1] = destructuring_bind 27
-is_deeply(
-  $arrayref,
-  [ 'foo', 27 ],
-  "Binding 27 to the next arrayref element"
-);
+{
+  my $arrayref = [ 1, 2 ];
+  ( $arrayref->[0] ) = destructuring_bind 27;
+  is_deeply(
+    $arrayref,
+    [ 27, 2 ],
+    "Binding 27 to arrayref slice in list context without 'my'"
+  );
+}
 # }}}
 
-# {{{ Hash key tests
-#
-my $hashref = {};
+# {{{ Binding true value to hashref slice
+{
+  my $hashref->{foo} = destructuring_bind 27;
+  is( $hashref->{foo}, 27, "Binding 27 to hashref slice in scalar context" );
+}
 
-$hashref->{foo} = destructuring_bind;
-is_deeply(
-  $hashref,
-  { },
-  "Binding undef doesn't autovivify a hashref key"
-);
+{
+  my ( $hashref->{foo} ) = destructuring_bind 27;
+  is( $hashref->{foo}, 27, "Binding 27 to hashref slice in list context" );
+}
 
-$hashref->{foo} = destructuring_bind 0;
-is_deeply(
-  $hashref,
-  { foo => 0 },
-  "Binding 0 to a hashref key"
-);
+{
+  my $hashref = { foo => 1, bar => 2 };
+  $hashref->{foo} = destructuring_bind 27;
+  is_deeply(
+    $hashref,
+    { foo => 27, bar => 2 },
+    "Binding 27 to hashref slice in scalar context without 'my'"
+  );
+}
 
-$hashref->{foo} = destructuring_bind '';
-is_deeply(
-  $hashref,
-  { foo => '' },
-  "Binding '' to a hashref key"
-);
-
-$hashref->{foo} = destructuring_bind 'bar';
-is_deeply(
-  $hashref,
-  { foo => 'bar' },
-  "Binding 'bar' to a hashref key"
-);
-
-$hashref->{1} = destructuring_bind 27
-is_deeply(
-  $hashref,
-  { foo => 'bar', 1 => 27 },
-  "Binding 27 to a new hashref key"
-);
+{
+  my $hash = { foo => 1, bar => 2 };
+  ( $hashref->{foo} ) = destructuring_bind 27;
+  is_deeply(
+    $hashref,
+    { foo => 27, bar => 2 },
+    "Binding 27 to hashref slice in list context without 'my'"
+  );
+}
 # }}}
-
-=cut
