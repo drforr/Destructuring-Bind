@@ -1,11 +1,11 @@
-package Lisp::Macro;
+package Destructuring::Bind;
 
 use warnings;
 use strict;
 
 =head1 NAME
 
-Lisp::Macro - The great new Lisp::Macro!
+Destructuring::Bind - The great new Destructuring::Bind!
 
 =head1 VERSION
 
@@ -22,10 +22,12 @@ Quick summary of what the module does.
 
 Perhaps a little code snippet.
 
-    use Lisp::Macro;
+    use Destructuring::Bind qw( destructuring_bind );
 
-    my $foo = Lisp::Macro->new();
-    ...
+    $bind_me = [ { text => q{Hello world} }, "Stuff" ];
+    ( $text, $description ) =
+      destructuring_bind $bind_me;
+    
 
 =head1 EXPORT
 
@@ -54,8 +56,8 @@ Jeff Goff, C<< <jgoff at cpan.org> >>
 
 =head1 BUGS
 
-Please report any bugs or feature requests to C<bug-lisp-macro at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Lisp-Macro>.  I will be notified, and then you'll
+Please report any bugs or feature requests to C<bug-destructuring-bind at rt.cpan.org>, or through
+the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Destructuring-Bind>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
 
 
@@ -65,7 +67,7 @@ automatically be notified of progress on your bug as I make changes.
 
 You can find documentation for this module with the perldoc command.
 
-    perldoc Lisp::Macro
+    perldoc Destructuring::Bind
 
 
 You can also look for information at:
@@ -74,19 +76,19 @@ You can also look for information at:
 
 =item * RT: CPAN's request tracker
 
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Lisp-Macro>
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Destructuring-Bind>
 
 =item * AnnoCPAN: Annotated CPAN documentation
 
-L<http://annocpan.org/dist/Lisp-Macro>
+L<http://annocpan.org/dist/Destructuring-Bind>
 
 =item * CPAN Ratings
 
-L<http://cpanratings.perl.org/d/Lisp-Macro>
+L<http://cpanratings.perl.org/d/Destructuring-Bind>
 
 =item * Search CPAN
 
-L<http://search.cpan.org/dist/Lisp-Macro/>
+L<http://search.cpan.org/dist/Destructuring-Bind/>
 
 =back
 
@@ -107,4 +109,4 @@ See http://dev.perl.org/licenses/ for more information.
 
 =cut
 
-1; # End of Lisp::Macro
+1; # End of Destructuring::Bind

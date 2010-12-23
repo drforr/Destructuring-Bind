@@ -3,10 +3,9 @@
 use Test::More tests => 1;
 
 BEGIN {
-    use_ok( 'Lisp::Macro' ) || print "Bail out!\n";
+    use_ok( 'Destructuring::Bind', 'destructuring_bind' ) ||
+      print "Bail out!\n";
 }
-
-diag( "Testing Lisp::Macro $Lisp::Macro::VERSION, Perl $], $^X" );
 
 # Test the undef conditions here when I've got time
 

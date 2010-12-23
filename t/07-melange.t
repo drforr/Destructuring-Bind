@@ -3,10 +3,9 @@
 use Test::More tests => 1;
 
 BEGIN {
-    use_ok( 'Lisp::Macro' ) || print "Bail out!\n";
+    use_ok( 'Destructuring::Bind', 'destructuring_bind' ) ||
+      print "Bail out!\n";
 }
-
-diag( "Testing Lisp::Macro $Lisp::Macro::VERSION, Perl $], $^X" );
 
 my ( $scalar, $c ) = ( 1, 2 );
 my ( @array, @d ) = ( 3, 4 ); # Doesn't init @d of course
@@ -87,4 +86,22 @@ is_deeply(
   [ [ @array ], $scalar ],
   [ [ 1, 2 ], undef ],
   "Prove that arrays still consume all of their arguments"
+);
+
+# "real-world" example, some parser output.
+
+my $foo = [ {
+  text => q(~<),
+  tilde => q(<),
+  content => [ {
+    text => q{foo}
+  } ]
+} ];
+
+[ { text => $x, tilde => $y, content => [ { text => $z } ] } ] =
+  destructuring_bind $foo;
+is_deeply(
+  [ $x, $y, $z ],
+  [ '~<', '<', 'foo' ],
+  "Real-life example"
 );
