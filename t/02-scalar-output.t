@@ -7,8 +7,8 @@ BEGIN {
       print "Bail out!\n";
 }
 
-# {{{ Binding to constant
-@
+# {{{ Bind errors
+#
 # You just *know* someone's going to try this.
 #
 eval { 0 = destructuring_bind };
@@ -29,62 +29,295 @@ is( $@, "Cannot destructuring_bind to a constant value" );
 
 # }}}
 
-# {{{ Scalar tests
-#
-# On to the real scalar tests
-#
-my ( $scalar ) = destructuring_bind;
-ok( ! $scalar, "Scalar is undef" );
+# {{{ Unused variables must be unaffected
+{
+  my $scalar = destructuring_bind;
+  ok( ! $scalar, "Binding undef in scalar context" );
+}
 
-( $scalar ) = destructuring_bind;
-ok( ! $scalar, "Can assign in a list context without 'my'" );
+{
+  my ( $scalar ) = destructuring_bind;
+  ok( ! $scalar, "Binding undef in list context" );
+}
 
-$scalar = destructuring_bind;
-ok( ! $scalar, "Can assign outside of a my() context" );
+{
+  my $scalar = 27;
+  $scalar = destructuring_bind;
+  is( $scalar, 27, "Binding in scalar context only affects used variables" );
+}
 
-$scalar = destructuring_bind( undef );
-ok( ! $scalar, "Passes undef through cleanly" );
-
-$scalar = destructuring_bind( undef );
-ok( ! $scalar, "Passes undef through cleanly" );
-
-$scalar = destructuring_bind( () );
-ok( ! $scalar, "Passes empty list through cleanly" );
-
-$scalar = destructuring_bind( "" );
-is( $scalar, "", "Passes empty string" );
-
-$scalar = destructuring_bind( 0 );
-is( $scalar, 0, "Binds 0 to scalar" );
-
-$scalar = destructuring_bind( 1 );
-is( $scalar, 1, "Binds 1 to scalar" );
-
-$scalar = destructuring_bind( 27 );
-is( $scalar, 27, "Binds 27 to scalar" );
-
-$scalar = destructuring_bind( 'foo' );
-is( $scalar, 'foo', "Binds 'foo' to scalar" );
-
-$scalar = destructuring_bind( qr/foo/ );
-is( ref( $scalar ), 'Regexp', "Binds regexp to scalar" );
-
-$scalar = destructuring_bind( [ ] );
-is_deeply( $scalar, [ ], "Binds arrayref to scalar" );
-
-$scalar = destructuring_bind( { } );
-is_deeply( $scalar, { }, "Binds hashref to scalar" );
-
-# Note that this behavior differs from [$x]=destructuring_bind [27]
-# Which sets $x to 27
-#
-$scalar = destructuring_bind( [ 'foo' ] );
-is_deeply( $scalar, [ 'foo' ], "Binds arrayref with content to scalar" );
-
-$scalar = destructuring_bind( { foo => 27 } );
-is_deeply( $scalar, { foo => 27 }, "Binds hashref with content to scalar" );
-
+{
+  my $scalar = 27;
+  ( $scalar ) = destructuring_bind;
+  is( $scalar, 27, "Binding in list context only affects used variables" );
+}
 # }}}
+
+# {{{ Binding undef to scalar binds
+{
+  my $scalar = destructuring_bind undef;
+  ok( ! $scalar, "Binding undef in scalar context" );
+}
+
+{
+  my ( $scalar ) = destructuring_bind undef;
+  ok( ! $scalar, "Binding undef in list context" );
+}
+
+{
+  my $scalar;
+  $scalar = destructuring_bind undef;
+  ok( ! $scalar, "Binding undef in scalar context, no 'my'" );
+}
+
+{
+  my $scalar;
+  ( $scalar )  = destructuring_bind undef;
+  ok( ! $scalar, "Binding undef in list context, no 'my'" );
+}
+# }}}
+
+# {{{ Binding false values to scalar binds
+{
+  my $scalar = destructuring_bind 0;
+  is( $scalar, 0, "Binding 0 in scalar context" );
+}
+
+{
+  my $scalar = destructuring_bind 0.0;
+  is( $scalar, 0.0, "Binding 0.0 in scalar context" );
+}
+
+{
+  my $scalar = destructuring_bind '';
+  is( $scalar, '', "Binding '' in scalar context" );
+}
+
+{
+  my $scalar = destructuring_bind '0';
+  is( $scalar, '0', "Binding '0' in scalar context" );
+}
+
+{
+  my ( $scalar ) = destructuring_bind 0;
+  is( $scalar, 0, "Binding 0 in list context" );
+}
+
+{
+  my ( $scalar ) = destructuring_bind 0.0;
+  is( $scalar, 0.0, "Binding 0.0 in list context" );
+}
+
+{
+  my ( $scalar ) = destructuring_bind '';
+  is( $scalar, '', "Binding '' in list context" );
+}
+
+{
+  my ( $scalar ) = destructuring_bind '0';
+  is( $scalar, '0', "Binding '0' in list context" );
+}
+
+{
+  my $scalar;
+  $scalar = destructuring_bind 0;
+  is( $scalar, 0, "Binding 0 in scalar context without 'my'" );
+}
+
+{
+  my $scalar;
+  $scalar = destructuring_bind 0.0;
+  is( $scalar, 0.0, "Binding 0.0 in scalar context without 'my'" );
+}
+
+{
+  my $scalar;
+  $scalar = destructuring_bind '';
+  is( $scalar, '', "Binding '' in scalar context without 'my'" );
+}
+
+{
+  my $scalar;
+  $scalar = destructuring_bind '0';
+  is( $scalar, '0', "Binding '0' in scalar context without 'my'" );
+}
+
+{
+  my $scalar;
+  ( $scalar ) = destructuring_bind 0;
+  is( $scalar, 0, "Binding 0 in list context without 'my'" );
+}
+
+{
+  my $scalar;
+  ( $scalar ) = destructuring_bind 0.0;
+  is( $scalar, 0.0, "Binding 0.0 in list context without 'my'" );
+}
+
+{
+  my $scalar;
+  ( $scalar ) = destructuring_bind '';
+  is( $scalar, '', "Binding '' in list context without 'my'" );
+}
+
+{
+  my $scalar;
+  ( $scalar ) = destructuring_bind '0';
+  is( $scalar, '0', "Binding '0' in list context without 'my'" );
+}
+# }}}
+
+# {{{ Binding true values to scalar binds
+{
+  my $scalar = destructuring_bind 27;
+  is( $scalar, 27, "Binding 27 in scalar context" );
+}
+
+{
+  my $scalar = destructuring_bind 'foo';
+  is( $scalar, 'foo', "Binding 'foo' in scalar context" );
+}
+
+{
+  my ( $scalar ) = destructuring_bind 27;
+  is( $scalar, 27, "Binding 27 in list context" );
+}
+
+{
+  my ( $scalar ) = destructuring_bind 'foo';
+  is( $scalar, 'foo', "Binding 'foo' in list context" );
+}
+
+{
+  my $scalar;
+  $scalar = destructuring_bind 27;
+  is( $scalar, 27, "Binding 27 in scalar context without 'my'" );
+}
+
+{
+  my $scalar;
+  $scalar = destructuring_bind 'foo';
+  is( $scalar, 'foo', "Binding 'foo' in scalar context without 'my'" );
+}
+
+{
+  my $scalar;
+  ( $scalar ) = destructuring_bind 27;
+  is( $scalar, 27, "Binding 27 in list context without 'my'" );
+}
+
+{
+  my $scalar;
+  ( $scalar ) = destructuring_bind 'foo';
+  is( $scalar, 'foo', "Binding 'foo' in list context without 'my'" );
+}
+# }}}
+
+# {{{ Binding references to scalar binds
+{
+  my $scalar = destructuring_bind [ ];
+  is_deeply( $scalar, [ ], "Binding [ ] in scalar context" );
+}
+
+{
+  my $scalar = destructuring_bind { };
+  is_deeply( $scalar, { }, "Binding { } in scalar context" );
+}
+
+{
+  my ( $scalar ) = destructuring_bind [ ];
+  is_deeply( $scalar, [ ], "Binding [ ] in list context" );
+}
+
+{
+  my ( $scalar ) = destructuring_bind { };
+  is_deeply( $scalar, { }, "Binding { } in list context" );
+}
+
+{
+  my $scalar;
+  $scalar = destructuring_bind [ ];
+  is_deeply( $scalar, [ ], "Binding [ ] in scalar context without 'my'" );
+}
+
+{
+  my $scalar;
+  $scalar = destructuring_bind { };
+  is_deeply( $scalar, { }, "Binding { } in scalar context without 'my'" );
+}
+
+{
+  my $scalar;
+  ( $scalar ) = destructuring_bind [ ];
+  is_deeply( $scalar, [ ], "Binding [ ] in list context without 'my'" );
+}
+
+{
+  my $scalar;
+  ( $scalar ) = destructuring_bind { };
+  is_deeply( $scalar, { }, "Binding { } in list context without 'my'" );
+}
+# }}}
+
+# {{{ Binding non-empty references to scalar binds
+{
+  my $scalar = destructuring_bind [ 27 ];
+  is_deeply( $scalar, [ 27 ], "Binding [ 27 ] in scalar context" );
+}
+
+{
+  my $scalar = destructuring_bind { foo => 27 };
+  is_deeply(
+     $scalar, { foo => 27 },
+     "Binding { foo => 27 } in scalar context"
+  );
+}
+
+{
+  my ( $scalar ) = destructuring_bind [ 27 ];
+  is_deeply( $scalar, [ 27 ], "Binding [ 27 ] in list context" );
+}
+
+{
+  my ( $scalar ) = destructuring_bind { foo => 27 };
+  is_deeply(
+     $scalar, { foo => 27 },
+     "Binding { foo => 27 } in list context"
+  );
+}
+
+{
+  my $scalar;
+  $scalar = destructuring_bind [ 27 ];
+  is_deeply( $scalar, [ 27 ], "Binding [ 27 ] in scalar context without 'my'" );
+}
+
+{
+  my $scalar;
+  $scalar = destructuring_bind { foo => 27 };
+  is_deeply(
+     $scalar, { foo => 27 },
+     "Binding { foo => 27 } in scalar context without 'my'"
+  );
+}
+
+{
+  my $scalar;
+  ( $scalar ) = destructuring_bind [ 27 ];
+  is_deeply( $scalar, [ 27 ], "Binding [ 27 ] in list context without 'my'" );
+}
+
+{
+  my $scalar;
+  ( $scalar ) = destructuring_bind { foo => 27 };
+  is_deeply(
+     $scalar, { foo => 27 },
+     "Binding { foo => 27 } in list context without 'my'"
+  );
+}
+# }}}
+
+=pod
 
 # {{{ Binding more than one list element to a scalar only gets the *first*.
 $scalar = destructuring_bind( 'foo', 27 );
@@ -259,3 +492,5 @@ is_deeply(
   "Binding 27 to a new hashref key"
 );
 # }}}
+
+=cut

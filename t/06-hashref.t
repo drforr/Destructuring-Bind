@@ -12,11 +12,26 @@ BEGIN {
 eval { { 1 => $x } = destructuring_bind 1 };
 like( $@, qr/Error blah blah/ );
 
+my ( @rest, %rest );
 my ( $scalar, $d ) = ( 1, 2 );
 
 # {{{ foo
 { foo => $scalar } = destructuring_bind { foo => 'qux' };
 is( $scalar, 'qux', "Hashref of scalar variable is handled correctly" );
+
+{ foo => $scalar, @rest } = destructuring_bind { foo => 'qux', bar => 1 };
+is_deeply(
+  [ $scalar, [ @rest ] ],
+  [ 'qux', [ bar => 1 ] ],
+  "Capturing unbound hash elements in an array"
+);
+
+{ foo => $scalar, %rest } = destructuring_bind { foo => 'qux', bar => 1 };
+is_deeply(
+  [ $scalar, \%rest ],
+  [ 'qux', { bar => 1 } ],
+  "Capturing unbound hash elements in a hash"
+);
 
 # This is probably not terribly useful due to the randomizer.
 #
